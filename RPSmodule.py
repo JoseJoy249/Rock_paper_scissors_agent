@@ -1,9 +1,11 @@
 import numpy as np
+
 def chars_to_dict(chars):
     chars = sorted(list(set(chars)))
     char_to_index  = {x: i for i, x in enumerate(chars)}
     return char_to_index
 
+# Classes of implementing LZ algorithm
 
 class Node:
     def __init__(self,code ='' ):
@@ -17,7 +19,7 @@ class Node:
         for w in char_to_index:
             self.child[char_to_index[w]] = Node(self.code+w)
         self.num_desc += len(char_to_index)
-
+        
 
 class Tree(Node):
     def __init__(self,char_to_index):
@@ -89,7 +91,8 @@ class Tree(Node):
                 leafs.append(nodes.code)
             for n in nodes.child:
                 self._collect_leaf_nodes( nodes.child[n], leafs)
-
+                
+                
 # Create classes for building context tree, where each node can store the code word, children and weights
 class CTNode:
     def __init__(self,char_to_index,code ='' ):
@@ -241,52 +244,6 @@ class CTree(CTNode):
             counter -= 1
         return prob1
 
-
-alph = ["R","P","S"]
-dict1 = chars_to_dict(alph)
-output = 'R'
-i = 0
-if input == "": # initialize variables for the first round
-    string=""
-
-    # CTW
-    max_depth = 10
-    code_tree = CTree(dict1, max_depth,full= False)
-    temp = list(dict1.keys())[0]
-    s0 = temp*max_depth
-
-    # LZ
-    temp1 = '' # temporary to find code words
-    alphabet = alph # set of alphabets
-    code_tree1 = Tree(dict1) # initalising LZ code tree
-
-
-else :
-    # string += input
-    char = input
-    i += 1
-    res = []
-
-    # CTW
-    state = s0
-    # if a new state is found, create nodes corresponding to that state
-    if code_tree.is_present(state) == False:
-        code_tree.add_branch(state)
-    res.append( code_tree.calc_prob(state,char) + np.random.normal(0,10/np.sqrt(i),3) )
-    s0 = s0[1:]+char
-
-    # LZ
-    temp1 += input
-    res.append( code_tree1.calc_prob(temp1[:-1]) + np.random.normal(0,10/np.sqrt(i),3) )
-    # if a new code word has to be created (unique sequence never before seen)
-    if code_tree1.calc_leafs(temp1)==0: # when we find new code words
-        code_tree1.add_nodes(temp1)
-        temp1 = "" # for finding new code words, by going back to the root of the tree
-        
-    res = np.array(res)
-    
-    # Weighted combination
-    output = alph[ np.argmax( (10*res[0,:]/np.sqrt(i)) + (res[1,:]) ) ]
 
 
 
